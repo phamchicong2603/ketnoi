@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Tiếng Anh Lớp 3 & 4</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f0f8ff; text-align: center; margin: 0; padding: 20px; }
+        .game-container { max-width: 500px; background: white; margin: 30px auto; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .score-board { font-size: 18px; font-weight: bold; color: #2c3e50; margin-bottom: 10px; }
+        .flashcard { font-size: 36px; font-weight: bold; color: #2980b9; background: #e8f4f8; padding: 30px; border-radius: 10px; margin: 20px 0; border: 2px dashed #3498db; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { padding: 15px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; background-color: #34495e; color: white; transition: 0.2s; }
+        button:hover { background-color: #2c3e50; }
+        .correct { background-color: #2ecc71 !important; }
+        .wrong { background-color: #e74c3c !important; }
+        #next-btn { margin-top: 20px; width: 100%; background-color: #e67e22; display: none; }
+        #next-btn:hover { background-color: #d35400; }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <h2>🎯 English Vocabulary Quiz</h2>
+    <div class="score-board">Điểm số: <span id="score">0</span></div>
+    
+    <!-- Từ tiếng Anh cần đoán nghĩa -->
+    <div class="flashcard" id="word-display">...</div>
+    
+    <!-- 4 Lựa chọn đáp án tiếng Việt -->
+    <div class="options-grid" id="options-container"></div>
+    
+    <button id="next-btn" onclick="nextQuestion()">Câu Tiếp Theo ➡️</button>
+</div>
+
+<script>
+    // Ngân hàng dữ liệu từ vựng lớp 3, lớp 4 (Dễ dàng thêm/sửa tại đây)
+    const vocabularyDb = [
+        { word: "Teacher", correct: "Giáo viên", wrongs: ["Học sinh", "Bác sĩ", "Kỹ sư"] },
+        { word: "Schoolbag", correct: "Cặp sách", wrongs: ["Bút chì", "Sách bài tập", "Thước kẻ"] },
+        { word: "Yellow", correct: "Màu vàng", wrongs: ["Màu đỏ", "Màu xanh lá", "Màu xanh dương"] },
+        { word: "Elephant", correct: "Con voi", wrongs: ["Con khỉ", "Con hổ", "Con mèo"] },
+        { word: "Library", correct: "Thư viện", wrongs: ["Phòng học", "Sân trường", "Nhà bếp"] },
+        { word: "Brother", correct: "Anh/Em trai", wrongs: ["Chị/Em gái", "Bố", "Mẹ"] },
+        { word: "Cook", correct: "Nấu ăn", wrongs: ["Xem phim", "Chạy bộ", "Đọc sách"] }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let canAnswer = true;
+
+    function loadQuestion() {
+        canAnswer = true;
+        document.getElementById("next-btn").style.display = "none";
+        
+        let currentData = vocabularyDb[currentQuestionIndex];
+        document.getElementById("word-display").innerText = currentData.word;
+        
+        // Trộn đáp án đúng và 3 đáp án sai lại với nhau
+        let choices = [currentData.correct, ...currentData.wrongs];
+        choices.sort(() => Math.random() - 0.5); 
+        
+        // Hiển thị các nút lựa chọn ra màn hình
+        const container = document.getElementById("options-container");
+        container.innerHTML = "";
+        
+        choices.forEach(choice => {
+            const btn = document.createElement("button");
+            btn.innerText = choice;
+            btn.onclick = () => checkAnswer(btn, choice, currentData.correct);
+            container.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedButton, choice, correctAns) {
+        if (!canAnswer) return; // Ngăn chặn bấm nhiều lần
+        canAnswer = false;
+        
+        const allButtons = document.querySelectorAll("#options-container button");
+        
+        if (choice === correctAns) {
+            selectedButton.classList.add("correct");
+            score += 10;
+            document.getElementById("score").innerText = score;
+        } else {
+            selectedButton.classList.add("wrong");
+            // Hiển thị luôn nút đúng cho học sinh thấy
+            allButtons.forEach(btn => {
+                if (btn.innerText === correctAns) btn.classList.add("correct");
+            });
+        }
+        
+        document.getElementById("next-btn").style.display = "block";
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < vocabularyDb.length) {
+            loadQuestion();
+        } else {
+            // Khi hết bộ câu hỏi, hiển thị thông báo kết thúc
+            document.getElementById("game-container").innerHTML = `
+                <h2>🎉 Chúc mừng bạn đã hoàn thành!</h2>
+                <p style="font-size: 20px;">Tổng số điểm đạt được: <strong>${score}</strong> điểm.</p>
+                <button onclick="location.reload()">Chơi lại từ đầu 🔄</button>
+            `;
+        }
+    }
+
+    // Chạy game lần đầu tiên khi tải trang
+    loadQuestion();
+</script>
+
+</body>
+</html>
